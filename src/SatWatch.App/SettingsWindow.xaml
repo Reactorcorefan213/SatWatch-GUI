@@ -1,58 +1,91 @@
 <Window x:Class="SatWatch.App.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Settings" Height="600" Width="900" WindowStartupLocation="CenterOwner">
-    <DockPanel Margin="10">
+        Title="Settings" Height="700" Width="1000" WindowStartupLocation="CenterOwner">
+    <DockPanel Margin="12">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content="OK" IsDefault="True" Click="Ok_Click" Width="80" Margin="4"/>
-            <Button Content="Cancel" IsCancel="True" Width="80" Margin="4"/>
+            <Button Content="Save" IsDefault="True" Click="Ok_Click" Width="90" Margin="4" Padding="8,4"/>
+            <Button Content="Cancel" IsCancel="True" Width="90" Margin="4" Padding="8,4"/>
         </StackPanel>
         <TabControl>
             <TabItem Header="General">
-                <StackPanel Margin="10">
-                    <TextBlock Text="Maidenhead Locator (4/6/8):"/>
-                    <TextBox x:Name="MaidenBox" Margin="0,4,0,10"/>
-                    <TextBlock Text="TLE Update URL:"/>
-                    <TextBox x:Name="TleUrlBox" Margin="0,4,0,10"/>
-                    <TextBlock Text="Update every (days):"/>
-                    <TextBox x:Name="TleDaysBox" Margin="0,4,0,10"/>
-                    <CheckBox x:Name="AutoUpdateBox" Content="Auto-update TLE" Margin="0,4,0,10"/>
+                <StackPanel Margin="16" MaxWidth="600">
+                    <TextBlock Text="Maidenhead Locator" FontWeight="Bold"/>
+                    <TextBlock Text="4, 6, or 8 characters (e.g. FN20ab)" FontSize="11" Foreground="Gray" Margin="0,0,0,4"/>
+                    <TextBox x:Name="MaidenBox" Margin="0,0,0,12"/>
+                    <TextBlock Text="TLE Update URL" FontWeight="Bold"/>
+                    <TextBox x:Name="TleUrlBox" Margin="0,0,0,12"/>
+                    <TextBlock Text="Update interval (days)" FontWeight="Bold"/>
+                    <TextBox x:Name="TleDaysBox" Width="80" HorizontalAlignment="Left" Margin="0,0,0,12"/>
+                    <CheckBox x:Name="AutoUpdateBox" Content="Automatically update TLEs" Margin="0,0,0,12"/>
                 </StackPanel>
             </TabItem>
             <TabItem Header="Satellites">
-                <Grid Margin="10">
+                <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ListBox x:Name="SatList" Grid.Row="0"/>
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
-                        <TextBox x:Name="NewSatName" Width="120" Margin="4,0" ToolTip="Name"/>
-                        <TextBox x:Name="NewSatNorad" Width="70" Margin="4,0" ToolTip="NORAD"/>
-                        <TextBox x:Name="NewSatTle1" Width="260" Margin="4,0" ToolTip="TLE line 1"/>
-                        <TextBox x:Name="NewSatTle2" Width="260" Margin="4,0" ToolTip="TLE line 2"/>
-                        <Button Content="Add" Click="AddSat_Click" Margin="4,0"/>
-                        <Button Content="Remove" Click="RemoveSat_Click" Margin="4,0"/>
-                    </StackPanel>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="360"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox Header="Favorites" Grid.Row="0" Grid.Column="0" Margin="0,0,8,0">
+                        <ListBox x:Name="SatList" Margin="6"/>
+                    </GroupBox>
+                    <GroupBox Header="Add / Edit Satellite" Grid.Row="0" Grid.Column="1" Margin="8,0,0,0">
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Name" FontWeight="Bold"/>
+                            <TextBox x:Name="NewSatName" Margin="0,2,0,8"/>
+                            <TextBlock Text="NORAD ID" FontWeight="Bold"/>
+                            <TextBox x:Name="NewSatNorad" Margin="0,2,0,8"/>
+                            <TextBlock Text="TLE Line 1" FontWeight="Bold"/>
+                            <TextBox x:Name="NewSatTle1" Margin="0,2,0,8"/>
+                            <TextBlock Text="TLE Line 2" FontWeight="Bold"/>
+                            <TextBox x:Name="NewSatTle2" Margin="0,2,0,8"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Add Satellite" Click="AddSat_Click" Padding="8,4" Margin="0,0,6,0"/>
+                                <Button Content="Remove Selected" Click="RemoveSat_Click" Padding="8,4"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Tip: paste TLE lines from Celestrak. Enabled favorites are tracked." Foreground="Gray" FontSize="11" Margin="0,8,0,0"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Alarms">
-                <Grid Margin="10">
+                <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ListBox x:Name="AlarmList" Grid.Row="0"/>
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
-                        <ComboBox x:Name="AlarmSatBox" Width="120" Margin="4,0"/>
-                        <ComboBox x:Name="AlarmMilestoneBox" Width="70" Margin="4,0"/>
-                        <TextBox x:Name="AlarmOffsetBox" Width="50" Margin="4,0" Text="0"/>
-                        <ComboBox x:Name="AlarmActionBox" Width="70" Margin="4,0"/>
-                        <TextBox x:Name="AlarmAudioBox" Width="140" Margin="4,0" ToolTip="Audio path"/>
-                        <TextBox x:Name="AlarmScriptBox" Width="140" Margin="4,0" ToolTip="Script path"/>
-                        <Button Content="Add" Click="AddAlarm_Click" Margin="4,0"/>
-                        <Button Content="Remove" Click="RemoveAlarm_Click" Margin="4,0"/>
-                    </StackPanel>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="400"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox Header="Alarm Rules" Grid.Row="0" Grid.Column="0" Margin="0,0,8,0">
+                        <ListBox x:Name="AlarmList" Margin="6"/>
+                    </GroupBox>
+                    <GroupBox Header="Add Alarm Rule" Grid.Row="0" Grid.Column="1" Margin="8,0,0,0">
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Satellite" FontWeight="Bold"/>
+                            <ComboBox x:Name="AlarmSatBox" Margin="0,2,0,8"/>
+                            <TextBlock Text="Milestone" FontWeight="Bold"/>
+                            <ComboBox x:Name="AlarmMilestoneBox" Margin="0,2,0,8"/>
+                            <TextBlock Text="Offset (seconds, negative = before)" FontWeight="Bold"/>
+                            <TextBox x:Name="AlarmOffsetBox" Text="0" Margin="0,2,0,8"/>
+                            <TextBlock Text="Action" FontWeight="Bold"/>
+                            <ComboBox x:Name="AlarmActionBox" Margin="0,2,0,8"/>
+                            <TextBlock Text="Audio file (.wav/.mp3)" FontWeight="Bold"/>
+                            <TextBox x:Name="AlarmAudioBox" Margin="0,2,0,8"/>
+                            <TextBlock Text="Script file (.bat/.ps1/.exe)" FontWeight="Bold"/>
+                            <TextBox x:Name="AlarmScriptBox" Margin="0,2,0,8"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Add Rule" Click="AddAlarm_Click" Padding="8,4" Margin="0,0,6,0"/>
+                                <Button Content="Remove Selected" Click="RemoveAlarm_Click" Padding="8,4"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Triggers fire when current time is within 3s of milestone + offset." Foreground="Gray" FontSize="11" Margin="0,8,0,0"/>
                 </Grid>
             </TabItem>
         </TabControl>
