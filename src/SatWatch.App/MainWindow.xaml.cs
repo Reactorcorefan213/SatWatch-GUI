@@ -29,7 +29,7 @@ public partial class MainWindow : Window
 
     private void InitMap()
     {
-        Map.MapProvider = GMapProviders.OpenStreetMap;
+        Map.MapProvider = GMapProviders.ArcGIS_World_Street_Map;
         Map.Position = new PointLatLng(_cfg.Latitude, _cfg.Longitude);
         Map.MinZoom = 2; Map.MaxZoom = 18; Map.Zoom = 4;
         Map.CanDragMap = true;
