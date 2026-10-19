@@ -1,8 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Threading;
-using GMap.NET;
-using GMap.NET.MapProviders;
-using GMap.NET.WindowsPresentation;
 using SatWatch.App.Models;
 using SatWatch.App.Services;
 using SatWatch.App.Views;
@@ -15,6 +12,9 @@ public partial class MainWindow : Window
     private readonly List<SatelliteTrack> _tracks = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(5) };
 
+    private const double MapW = 1024;
+    private const double MapH = 512;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -22,20 +22,9 @@ public partial class MainWindow : Window
         {
             _cfg.Latitude = lat; _cfg.Longitude = lon;
         }
-        Loaded += (_, _) => InitMap();
+        Loaded += (_, _) => { RebuildTracks(); DrawOverlays(); };
         _timer.Tick += (_, _) => Tick();
         _timer.Start();
-    }
-
-    private void InitMap()
-    {
-        Map.MapProvider = GMapProviders.ArcGIS_Imagery_World_2D_Map;
-        Map.Position = new PointLatLng(_cfg.Latitude, _cfg.Longitude);
-        Map.MinZoom = 2; Map.MaxZoom = 18; Map.Zoom = 4;
-        Map.CanDragMap = true;
-        Map.MouseWheelZoomType = MouseWheelZoomType.MousePositionAndCenter;
-        RebuildTracks();
-        DrawOverlays();
     }
 
     private void RebuildTracks()
@@ -50,74 +39,80 @@ public partial class MainWindow : Window
             TrackerService.ComputePasses(t, DateTime.UtcNow, DateTime.UtcNow.AddDays(2));
     }
 
+    private static double LonToX(double lon) => (lon + 180.0) / 360.0 * MapW;
+    private static double LatToY(double lat) => (90.0 - lat) / 180.0 * MapH;
+
     private void DrawOverlays()
     {
-        Map.Markers.Clear();
-        // Home pin
-        // Basestation icon
-        var bsCanvas = new System.Windows.Controls.Canvas { Width = 24, Height = 24 };
-        var tri = new System.Windows.Shapes.Polygon { Points = new System.Windows.Media.PointCollection { new System.Windows.Point(12,0), new System.Windows.Point(24,24), new System.Windows.Point(0,24) }, Fill = System.Windows.Media.Brushes.OrangeRed, Stroke = System.Windows.Media.Brushes.White, StrokeThickness = 1 };
-        bsCanvas.Children.Add(tri);
-        var homeMarker = new GMapMarker(new PointLatLng(_cfg.Latitude, _cfg.Longitude))
+        Overlay.Children.Clear();
+
+        var bs = new System.Windows.Shapes.Polygon
         {
-            Shape = bsCanvas,
-            Offset = new Point(-12, -12)
+            Points = new System.Windows.Media.PointCollection { new System.Windows.Point(0, -12), new System.Windows.Point(10, 8), new System.Windows.Point(-10, 8) },
+            Fill = System.Windows.Media.Brushes.OrangeRed,
+            Stroke = System.Windows.Media.Brushes.White,
+            StrokeThickness = 1
         };
-        Map.Markers.Add(homeMarker);
+        System.Windows.Controls.Canvas.SetLeft(bs, LonToX(_cfg.Longitude));
+        System.Windows.Controls.Canvas.SetTop(bs, LatToY(_cfg.Latitude));
+        Overlay.Children.Add(bs);
 
         foreach (var track in _tracks)
         {
-            var satCanvas = new System.Windows.Controls.Canvas { Width = 16, Height = 16 };
-            var satDot = new System.Windows.Shapes.Ellipse { Width = 10, Height = 10, Fill = System.Windows.Media.Brushes.Lime, Stroke = System.Windows.Media.Brushes.White, StrokeThickness = 1 };
-            System.Windows.Controls.Canvas.SetLeft(satDot, 3); System.Windows.Controls.Canvas.SetTop(satDot, 3);
-            satCanvas.Children.Add(satDot);
-            var satLabel = new System.Windows.Controls.TextBlock { Text = track.Favorite.Name, Foreground = System.Windows.Media.Brushes.Yellow, FontSize = 10, FontWeight = FontWeights.Bold };
-            System.Windows.Controls.Canvas.SetLeft(satLabel, 16); System.Windows.Controls.Canvas.SetTop(satLabel, 0);
-            satCanvas.Children.Add(satLabel);
-            var satMarker = new GMapMarker(new PointLatLng(track.Lat, track.Lon))
-            {
-                Shape = satCanvas,
-                Offset = new Point(-8, -8)
-            };
-            Map.Markers.Add(satMarker);
-
-            // Footprint circle as polygon
             if (track.Footprint.Count > 2)
             {
-                var poly = new GMapPolygon(track.Footprint.Select(p => new PointLatLng(p.lat, p.lon)).ToList())
+                var poly = new System.Windows.Shapes.Polygon
                 {
-                    Shape = new System.Windows.Shapes.Polygon { Stroke = System.Windows.Media.Brushes.Cyan, StrokeThickness = 1, Fill = System.Windows.Media.Brushes.Transparent }
+                    Stroke = System.Windows.Media.Brushes.Cyan,
+                    StrokeThickness = 1,
+                    Fill = System.Windows.Media.Brushes.Transparent,
+                    Points = new System.Windows.Media.PointCollection(track.Footprint.Select(p => new System.Windows.Point(LonToX(p.lon), LatToY(p.lat))))
                 };
-                Map.Markers.Add(poly);
+                Overlay.Children.Add(poly);
             }
 
-            // Path line
             if (track.Path.Count > 1)
             {
-                var route = new GMapRoute(track.Path.Select(p => new PointLatLng(p.lat, p.lon)).ToList())
+                var line = new System.Windows.Shapes.Polyline
                 {
-                    Shape = new System.Windows.Shapes.Polyline { Stroke = System.Windows.Media.Brushes.Lime, StrokeThickness = 2 }
+                    Stroke = System.Windows.Media.Brushes.Lime,
+                    StrokeThickness = 2,
+                    Points = new System.Windows.Media.PointCollection(track.Path.Select(p => new System.Windows.Point(LonToX(p.lon), LatToY(p.lat))))
                 };
-                Map.Markers.Add(route);
+                Overlay.Children.Add(line);
             }
+
+            var dot = new System.Windows.Shapes.Ellipse { Width = 8, Height = 8, Fill = System.Windows.Media.Brushes.Lime, Stroke = System.Windows.Media.Brushes.White, StrokeThickness = 1 };
+            System.Windows.Controls.Canvas.SetLeft(dot, LonToX(track.Lon) - 4);
+            System.Windows.Controls.Canvas.SetTop(dot, LatToY(track.Lat) - 4);
+            Overlay.Children.Add(dot);
+
+            var label = new System.Windows.Controls.TextBlock { Text = track.Favorite.Name, Foreground = System.Windows.Media.Brushes.Yellow, FontSize = 10, FontWeight = FontWeights.Bold };
+            System.Windows.Controls.Canvas.SetLeft(label, LonToX(track.Lon) + 6);
+            System.Windows.Controls.Canvas.SetTop(label, LatToY(track.Lat) - 6);
+            Overlay.Children.Add(label);
         }
     }
 
     private void Tick()
     {
         foreach (var t in _tracks)
-        {
             TrackerService.UpdatePosition(t);
-        }
         DrawOverlays();
         UpdatePassList();
         RunAlarms();
         StatusText.Text = $"Home: {_cfg.Maidenhead} | Sats: {_tracks.Count} | {DateTime.Now:T}";
-        // TLE auto update check
         if (_cfg.AutoUpdateTle && (DateTime.UtcNow - _cfg.LastTleUpdateUtc).TotalDays >= _cfg.TleUpdateDays)
-        {
             _ = AutoUpdateTleAsync();
-        }
+    }
+
+    private void UpdatePassList()
+    {
+        var items = new List<string>();
+        foreach (var t in _tracks)
+            foreach (var p in t.Passes.Take(3))
+                items.Add($"{t.Favorite.Name}: AOS {p.Start.ToLocalTime():g} TCA {p.MaxElevationTime.ToLocalTime():t} LOS {p.End.ToLocalTime():t}");
+        PassList.ItemsSource = items;
     }
 
     private async Task AutoUpdateTleAsync()
@@ -130,21 +125,9 @@ public partial class MainWindow : Window
             TleService.UpdateFavorites(_cfg, fetched);
             ConfigService.Save(_cfg);
             RebuildTracks();
+            DrawOverlays();
         }
         catch { }
-    }
-
-    private void UpdatePassList()
-    {
-        var items = new List<string>();
-        foreach (var t in _tracks)
-        {
-            foreach (var p in t.Passes.Take(3))
-            {
-                items.Add($"{t.Favorite.Name}: AOS {p.Start.ToLocalTime():g} TCA {p.MaxElevationTime.ToLocalTime():t} LOS {p.End.ToLocalTime():t}");
-            }
-        }
-        PassList.ItemsSource = items;
     }
 
     private void RunAlarms()
@@ -174,23 +157,13 @@ public partial class MainWindow : Window
     private void TriggerAlarm(AlarmRule rule)
     {
         if (rule.Action is AlarmActionType.Audio or AlarmActionType.All)
-        {
             if (!string.IsNullOrEmpty(rule.AudioPath))
                 Task.Run(() => AudioPlayer.Play(rule.AudioPath));
-        }
         if (rule.Action is AlarmActionType.Script or AlarmActionType.All)
-        {
             if (!string.IsNullOrEmpty(rule.ScriptPath))
                 ScriptRunner.Run(rule.ScriptPath);
-        }
         if (rule.Action is AlarmActionType.Flash or AlarmActionType.All)
-        {
             Dispatcher.Invoke(() => new FlashOverlay(5).Show());
-        }
-    }
-
-    private void Map_Loaded(object sender, RoutedEventArgs e)
-    {
     }
 
     private void Settings_Click(object sender, RoutedEventArgs e)
@@ -203,14 +176,10 @@ public partial class MainWindow : Window
             {
                 _cfg.Latitude = lat; _cfg.Longitude = lon;
             }
-            Map.Position = new PointLatLng(_cfg.Latitude, _cfg.Longitude);
             RebuildTracks();
             DrawOverlays();
         }
     }
 
-    private void UpdateTle_Click(object sender, RoutedEventArgs e)
-    {
-        _ = AutoUpdateTleAsync();
-    }
+    private void UpdateTle_Click(object sender, RoutedEventArgs e) => _ = AutoUpdateTleAsync();
 }

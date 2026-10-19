@@ -10,8 +10,11 @@
 
   <ItemGroup>
     <PackageReference Include="GMap.NET.WinPresentation" Version="2.1.7" />
-    <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="SGP.NET" Version="1.6.0" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\earth.jpg" />
   </ItemGroup>
 
 </Project>
