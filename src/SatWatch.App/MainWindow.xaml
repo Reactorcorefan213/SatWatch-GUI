@@ -19,6 +19,7 @@
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="8">
             <TextBlock x:Name="StatusText" VerticalAlignment="Center" Margin="8,0"/>
+            <TextBlock Text="Imagery © Esri / NASA (via ArcGIS)" VerticalAlignment="Center" Margin="8,0" Foreground="Gray" FontSize="10"/>
             <Button Content="Settings" Click="Settings_Click" Margin="8,0"/>
             <Button Content="Update TLE" Click="UpdateTle_Click" Margin="8,0"/>
         </StackPanel>

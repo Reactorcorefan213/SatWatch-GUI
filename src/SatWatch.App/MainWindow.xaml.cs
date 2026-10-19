@@ -29,7 +29,7 @@ public partial class MainWindow : Window
 
     private void InitMap()
     {
-        Map.MapProvider = GMapProviders.ArcGIS_World_Street_Map;
+        Map.MapProvider = GMapProviders.ArcGIS_Imagery_World_2D_Map;
         Map.Position = new PointLatLng(_cfg.Latitude, _cfg.Longitude);
         Map.MinZoom = 2; Map.MaxZoom = 18; Map.Zoom = 4;
         Map.CanDragMap = true;
@@ -54,19 +54,30 @@ public partial class MainWindow : Window
     {
         Map.Markers.Clear();
         // Home pin
+        // Basestation icon
+        var bsCanvas = new System.Windows.Controls.Canvas { Width = 24, Height = 24 };
+        var tri = new System.Windows.Shapes.Polygon { Points = new System.Windows.Media.PointCollection { new System.Windows.Point(12,0), new System.Windows.Point(24,24), new System.Windows.Point(0,24) }, Fill = System.Windows.Media.Brushes.OrangeRed, Stroke = System.Windows.Media.Brushes.White, StrokeThickness = 1 };
+        bsCanvas.Children.Add(tri);
         var homeMarker = new GMapMarker(new PointLatLng(_cfg.Latitude, _cfg.Longitude))
         {
-            Shape = new System.Windows.Shapes.Ellipse { Width = 12, Height = 12, Fill = System.Windows.Media.Brushes.Red, Stroke = System.Windows.Media.Brushes.White, StrokeThickness = 2 },
-            Offset = new Point(-6, -6)
+            Shape = bsCanvas,
+            Offset = new Point(-12, -12)
         };
         Map.Markers.Add(homeMarker);
 
         foreach (var track in _tracks)
         {
+            var satCanvas = new System.Windows.Controls.Canvas { Width = 16, Height = 16 };
+            var satDot = new System.Windows.Shapes.Ellipse { Width = 10, Height = 10, Fill = System.Windows.Media.Brushes.Lime, Stroke = System.Windows.Media.Brushes.White, StrokeThickness = 1 };
+            System.Windows.Controls.Canvas.SetLeft(satDot, 3); System.Windows.Controls.Canvas.SetTop(satDot, 3);
+            satCanvas.Children.Add(satDot);
+            var satLabel = new System.Windows.Controls.TextBlock { Text = track.Favorite.Name, Foreground = System.Windows.Media.Brushes.Yellow, FontSize = 10, FontWeight = FontWeights.Bold };
+            System.Windows.Controls.Canvas.SetLeft(satLabel, 16); System.Windows.Controls.Canvas.SetTop(satLabel, 0);
+            satCanvas.Children.Add(satLabel);
             var satMarker = new GMapMarker(new PointLatLng(track.Lat, track.Lon))
             {
-                Shape = new System.Windows.Controls.TextBlock { Text = track.Favorite.Name, Foreground = System.Windows.Media.Brushes.Yellow, FontSize = 10, FontWeight = FontWeights.Bold },
-                Offset = new Point(0, 0)
+                Shape = satCanvas,
+                Offset = new Point(-8, -8)
             };
             Map.Markers.Add(satMarker);
 
