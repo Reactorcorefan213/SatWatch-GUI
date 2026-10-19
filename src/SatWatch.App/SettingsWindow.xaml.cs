@@ -1,3 +1,5 @@
+using SatWatch.App.Services;
+using System.Windows.Controls;
 using System.Windows;
 using SatWatch.App.Models;
 
@@ -6,6 +8,9 @@ namespace SatWatch.App;
 public partial class SettingsWindow : Window
 {
     private readonly AppConfig _cfg;
+
+    private List<FavoriteSatellite> _browsed = new();
+    private List<FavoriteSatellite> _filtered = new();
 
     public SettingsWindow(AppConfig cfg)
     {
@@ -18,6 +23,17 @@ public partial class SettingsWindow : Window
 
         AlarmMilestoneBox.ItemsSource = Enum.GetValues(typeof(AlarmMilestone));
         AlarmActionBox.ItemsSource = Enum.GetValues(typeof(AlarmActionType));
+
+        TleSourceBox.ItemsSource = new List<string>
+        {
+            "Amateur Radio|https://celestrak.org/NORAD/elements/gp.php?GROUP=amateur&FORMAT=tle",
+            "Weather|https://celestrak.org/NORAD/elements/gp.php?GROUP=weather&FORMAT=tle",
+            "Stations (ISS)|https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle",
+            "Visual|https://celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=tle",
+            "GPS|https://celestrak.org/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=tle",
+            "Starlink|https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle"
+        };
+        TleSourceBox.SelectedIndex = 0;
 
         RefreshSatList();
         RefreshAlarmList();
@@ -34,6 +50,55 @@ public partial class SettingsWindow : Window
     {
         AlarmList.ItemsSource = null;
         AlarmList.ItemsSource = _cfg.Alarms.Select(a => $"{a.SatelliteName} {a.Milestone} {a.OffsetSeconds}s {a.Action}").ToList();
+    }
+
+    private async void FetchTleList_Click(object sender, RoutedEventArgs e)
+    {
+        if (TleSourceBox.SelectedItem == null) return;
+        var url = TleSourceBox.SelectedItem.ToString()!.Split('|')[1];
+        try
+        {
+            FetchTleList.IsEnabled = false;
+            var raw = await TleService.FetchRawAsync(url);
+            _browsed = TleService.ParseTleText(raw);
+            ApplyFilter();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Fetch failed: " + ex.Message);
+        }
+        finally
+        {
+            FetchTleList.IsEnabled = true;
+        }
+    }
+
+    private void TleSearchBox_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilter();
+
+    private void ApplyFilter()
+    {
+        var q = (TleSearchBox.Text ?? "").Trim().ToLowerInvariant();
+        _filtered = string.IsNullOrEmpty(q)
+            ? _browsed
+            : _browsed.Where(s => s.Name.ToLowerInvariant().Contains(q) || s.NoradId.ToString().Contains(q)).ToList();
+        TleBrowseList.ItemsSource = _filtered.Select(s => $"{s.Name} ({s.NoradId})").ToList();
+    }
+
+    private void AddBrowsed_Click(object sender, RoutedEventArgs e)
+    {
+        if (TleBrowseList.SelectedIndex < 0 || TleBrowseList.SelectedIndex >= _filtered.Count) return;
+        var sel = _filtered[TleBrowseList.SelectedIndex];
+        if (_cfg.Favorites.Any(f => f.NoradId == sel.NoradId && sel.NoradId != 0)) return;
+        _cfg.Favorites.Add(new FavoriteSatellite
+        {
+            Name = sel.Name,
+            NoradId = sel.NoradId,
+            TleLine1 = sel.TleLine1,
+            TleLine2 = sel.TleLine2,
+            Enabled = true
+        });
+        RefreshSatList();
+        AlarmSatBox.ItemsSource = _cfg.Favorites.Select(f => f.Name).ToList();
     }
 
     private void AddSat_Click(object sender, RoutedEventArgs e)
@@ -93,3 +158,5 @@ public partial class SettingsWindow : Window
         DialogResult = true;
     }
 }
+
+

@@ -28,28 +28,41 @@
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="360"/>
+                        <ColumnDefinition Width="420"/>
                     </Grid.ColumnDefinitions>
                     <GroupBox Header="Favorites" Grid.Row="0" Grid.Column="0" Margin="0,0,8,0">
                         <ListBox x:Name="SatList" Margin="6"/>
                     </GroupBox>
-                    <GroupBox Header="Add / Edit Satellite" Grid.Row="0" Grid.Column="1" Margin="8,0,0,0">
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Name" FontWeight="Bold"/>
-                            <TextBox x:Name="NewSatName" Margin="0,2,0,8"/>
-                            <TextBlock Text="NORAD ID" FontWeight="Bold"/>
-                            <TextBox x:Name="NewSatNorad" Margin="0,2,0,8"/>
-                            <TextBlock Text="TLE Line 1" FontWeight="Bold"/>
-                            <TextBox x:Name="NewSatTle1" Margin="0,2,0,8"/>
-                            <TextBlock Text="TLE Line 2" FontWeight="Bold"/>
-                            <TextBox x:Name="NewSatTle2" Margin="0,2,0,8"/>
-                            <StackPanel Orientation="Horizontal">
-                                <Button Content="Add Satellite" Click="AddSat_Click" Padding="8,4" Margin="0,0,6,0"/>
-                                <Button Content="Remove Selected" Click="RemoveSat_Click" Padding="8,4"/>
+                    <TabControl Grid.Row="0" Grid.Column="1" Margin="8,0,0,0">
+                        <TabItem Header="Manual">
+                            <StackPanel Margin="8">
+                                <TextBlock Text="Name" FontWeight="Bold"/>
+                                <TextBox x:Name="NewSatName" Margin="0,2,0,8"/>
+                                <TextBlock Text="NORAD ID" FontWeight="Bold"/>
+                                <TextBox x:Name="NewSatNorad" Margin="0,2,0,8"/>
+                                <TextBlock Text="TLE Line 1" FontWeight="Bold"/>
+                                <TextBox x:Name="NewSatTle1" Margin="0,2,0,8"/>
+                                <TextBlock Text="TLE Line 2" FontWeight="Bold"/>
+                                <TextBox x:Name="NewSatTle2" Margin="0,2,0,8"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Add Satellite" Click="AddSat_Click" Padding="8,4" Margin="0,0,6,0"/>
+                                    <Button Content="Remove Selected" Click="RemoveSat_Click" Padding="8,4"/>
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                    </GroupBox>
-                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Tip: paste TLE lines from Celestrak. Enabled favorites are tracked." Foreground="Gray" FontSize="11" Margin="0,8,0,0"/>
+                        </TabItem>
+                        <TabItem Header="Browse TLEs">
+                            <StackPanel Margin="8">
+                                <TextBlock Text="Source" FontWeight="Bold"/>
+                                <ComboBox x:Name="TleSourceBox" Margin="0,2,0,8"/>
+                                <Button x:Name="FetchTleList" Content="Fetch List" Click="FetchTleList_Click" Padding="8,4" Margin="0,0,0,8"/>
+                                <TextBlock Text="Search" FontWeight="Bold"/>
+                                <TextBox x:Name="TleSearchBox" Margin="0,2,0,8" TextChanged="TleSearchBox_TextChanged"/>
+                                <ListBox x:Name="TleBrowseList" Height="260" Margin="0,0,0,8"/>
+                                <Button Content="Add Selected to Favorites" Click="AddBrowsed_Click" Padding="8,4"/>
+                            </StackPanel>
+                        </TabItem>
+                    </TabControl>
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Tip: use Browse to download amateur radio and other groups from Celestrak." Foreground="Gray" FontSize="11" Margin="0,8,0,0"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Alarms">
