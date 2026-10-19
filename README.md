@@ -32,5 +32,9 @@ dotnet publish src/SatWatch.App -c Release -r win-x64 --self-contained true /p:P
 ```
 
 ## Notes
-- Config stored in `%APPDATA%\SatWatch\config.json`.
+- Config stored in %APPDATA%\SatWatch\config.json.
 - GMap.NET caches tiles locally.
+
+## Contributors
+- Reactorcorefan213
+- opencode (AI coding assistant)
