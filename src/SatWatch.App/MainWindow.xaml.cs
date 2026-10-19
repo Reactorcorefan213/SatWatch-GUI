@@ -99,6 +99,7 @@ public partial class MainWindow : Window
             TrackerService.UpdatePosition(t);
         }
         DrawOverlays();
+        UpdatePassList();
         RunAlarms();
         StatusText.Text = $"Home: {_cfg.Maidenhead} | Sats: {_tracks.Count} | {DateTime.Now:T}";
         // TLE auto update check
@@ -120,6 +121,19 @@ public partial class MainWindow : Window
             RebuildTracks();
         }
         catch { }
+    }
+
+    private void UpdatePassList()
+    {
+        var items = new List<string>();
+        foreach (var t in _tracks)
+        {
+            foreach (var p in t.Passes.Take(3))
+            {
+                items.Add($"{t.Favorite.Name}: AOS {p.Start.ToLocalTime():g} TCA {p.MaxElevationTime.ToLocalTime():t} LOS {p.End.ToLocalTime():t}");
+            }
+        }
+        PassList.ItemsSource = items;
     }
 
     private void RunAlarms()

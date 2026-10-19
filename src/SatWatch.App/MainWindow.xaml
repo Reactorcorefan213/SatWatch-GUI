@@ -4,12 +4,20 @@
         xmlns:gmap="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
         Title="SatWatch" Height="720" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="260"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <gmap:GMapControl x:Name="Map" Grid.Row="0" Loaded="Map_Loaded"/>
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="8">
+        <gmap:GMapControl x:Name="Map" Grid.Row="0" Grid.Column="0" Loaded="Map_Loaded"/>
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="8">
+            <TextBlock Text="Upcoming Passes" FontWeight="Bold" Margin="0,0,0,4"/>
+            <ListBox x:Name="PassList" Height="600"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="8">
             <TextBlock x:Name="StatusText" VerticalAlignment="Center" Margin="8,0"/>
             <Button Content="Settings" Click="Settings_Click" Margin="8,0"/>
             <Button Content="Update TLE" Click="UpdateTle_Click" Margin="8,0"/>
