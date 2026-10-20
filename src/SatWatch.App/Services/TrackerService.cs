@@ -56,9 +56,9 @@ public static class TrackerService
     {
         try
         {
-            var periods = track.Ground.Observe(track.Satellite, fromUtc, toUtc, TimeSpan.FromSeconds(30), Angle.FromDegrees(0), false, false, 10);
-            track.Passes = periods.ToList();
-            track.NextPass = periods.FirstOrDefault();
+            var periods = track.Ground.Observe(track.Satellite, fromUtc, toUtc, TimeSpan.FromSeconds(60), Angle.FromDegrees(0), false, false, 15);
+            track.Passes = periods.OrderBy(p => p.Start).ToList();
+            track.NextPass = track.Passes.FirstOrDefault();
             if (track.NextPass != null)
             {
                 track.Path.Clear();

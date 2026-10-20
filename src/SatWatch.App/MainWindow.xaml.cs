@@ -32,13 +32,13 @@ public partial class MainWindow : Window
     private void RebuildTracks()
     {
         _tracks.Clear();
-        foreach (var fav in _cfg.Favorites.Where(f => f.Enabled))
+        foreach (var fav in _cfg.Favorites)
         {
             var t = TrackerService.Build(fav, _cfg.Latitude, _cfg.Longitude);
             if (t != null) _tracks.Add(t);
         }
         foreach (var t in _tracks)
-            TrackerService.ComputePasses(t, DateTime.UtcNow, DateTime.UtcNow.AddDays(2));
+            TrackerService.ComputePasses(t, DateTime.UtcNow, DateTime.UtcNow.AddDays(3));
     }
 
     private static double LonToX(double lon) => (lon + 180.0) / 360.0 * MapW;
@@ -130,9 +130,14 @@ public partial class MainWindow : Window
     private void UpdatePassList()
     {
         var items = new List<string>();
-        foreach (var t in _tracks)
-            foreach (var p in t.Passes.Take(3))
-                items.Add($"{t.Favorite.Name}: AOS {p.Start.ToLocalTime():g} TCA {p.MaxElevationTime.ToLocalTime():t} LOS {p.End.ToLocalTime():t}");
+        foreach (var t in _tracks.OrderBy(x => x.NextPass?.Start ?? DateTime.MaxValue))
+        {
+            if (t.NextPass != null)
+            {
+                var p = t.NextPass;
+                items.Add($"{t.Favorite.Name}: AOS {p.Start.ToLocalTime():MM/dd HH:mm} TCA {p.MaxElevationTime.ToLocalTime():HH:mm} LOS {p.End.ToLocalTime():HH:mm} El {(p.MaxElevation.Degrees).ToString("0.0")}°");
+            }
+        }
         PassList.ItemsSource = items;
     }
 
