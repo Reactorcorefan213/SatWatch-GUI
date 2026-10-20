@@ -14,12 +14,14 @@ public partial class SettingsWindow : Window
 
     public SettingsWindow(AppConfig cfg)
     {
+        ThemeService.Apply(cfg.Theme ?? "Light");
         InitializeComponent();
         _cfg = cfg;
         MaidenBox.Text = cfg.Maidenhead;
         TleUrlBox.Text = cfg.TleUpdateUrl;
         TleDaysBox.Text = cfg.TleUpdateDays.ToString();
         AutoUpdateBox.IsChecked = cfg.AutoUpdateTle;
+        ThemeBox.SelectedIndex = (cfg.Theme == "Dark") ? 1 : 0;
 
         AlarmMilestoneBox.ItemsSource = Enum.GetValues(typeof(AlarmMilestone));
         AlarmActionBox.ItemsSource = Enum.GetValues(typeof(AlarmActionType));
@@ -155,6 +157,8 @@ public partial class SettingsWindow : Window
         _cfg.TleUpdateUrl = TleUrlBox.Text.Trim();
         if (int.TryParse(TleDaysBox.Text, out var d)) _cfg.TleUpdateDays = d;
         _cfg.AutoUpdateTle = AutoUpdateBox.IsChecked == true;
+        _cfg.Theme = (ThemeBox.SelectedIndex == 1) ? "Dark" : "Light";
+        ThemeService.Apply(_cfg.Theme);
         DialogResult = true;
     }
 }

@@ -18,6 +18,11 @@
                     <TextBlock Text="Update interval (days)" FontWeight="Bold"/>
                     <TextBox x:Name="TleDaysBox" Width="80" HorizontalAlignment="Left" Margin="0,0,0,12"/>
                     <CheckBox x:Name="AutoUpdateBox" Content="Automatically update TLEs" Margin="0,0,0,12"/>
+                    <TextBlock Text="Theme" FontWeight="Bold"/>
+                    <ComboBox x:Name="ThemeBox" Margin="0,2,0,12">
+                        <ComboBoxItem Content="Light"/>
+                        <ComboBoxItem Content="Dark"/>
+                    </ComboBox>
                 </StackPanel>
             </TabItem>
             <TabItem Header="Satellites">

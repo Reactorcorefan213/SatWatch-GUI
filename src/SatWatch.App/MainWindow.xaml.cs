@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Threading;
 using SatWatch.App.Models;
 using SatWatch.App.Services;
@@ -17,13 +18,13 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        InitializeComponent();
         ThemeService.Apply(_cfg.Theme ?? "Light");
+        InitializeComponent();
         if (MaidenheadConverter.TryParse(_cfg.Maidenhead, out var lat, out var lon))
         {
             _cfg.Latitude = lat; _cfg.Longitude = lon;
         }
-        Loaded += (_, _) => { RebuildTracks(); DrawOverlays(); };
+        Loaded += (_, _) => { ApplyMica(); RebuildTracks(); DrawOverlays(); };
         _timer.Tick += (_, _) => Tick();
         _timer.Start();
     }
@@ -93,6 +94,25 @@ public partial class MainWindow : Window
             System.Windows.Controls.Canvas.SetTop(label, LatToY(track.Lat) - 6);
             Overlay.Children.Add(label);
         }
+    }
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+    private void ApplyMica()
+    {
+        try
+        {
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
+            int backdrop = 2; // Mica
+            DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof(int));
+            // Also enable dark mode frame if dark theme
+            const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+            int dark = (_cfg.Theme == "Dark") ? 1 : 0;
+            DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref dark, sizeof(int));
+        }
+        catch { }
     }
 
     private void Tick()
