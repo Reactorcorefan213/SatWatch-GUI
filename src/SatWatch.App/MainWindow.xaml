@@ -25,6 +25,7 @@
             <TextBlock Text="Imagery © NASA (Blue Marble)" VerticalAlignment="Center" Margin="8,0" Foreground="Gray" FontSize="10"/>
             <Button Content="Settings" Click="Settings_Click" Margin="8,0"/>
             <Button Content="Update TLE" Click="UpdateTle_Click" Margin="8,0"/>
+            <Button x:Name="ThemeButton" Content="Theme" Click="Theme_Click" Margin="8,0"/>
         </StackPanel>
     </Grid>
 </Window>

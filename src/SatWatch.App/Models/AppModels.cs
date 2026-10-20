@@ -40,4 +40,5 @@ public class AppConfig
     public DateTime LastTleUpdateUtc { get; set; } = DateTime.MinValue;
     public List<AlarmRule> Alarms { get; set; } = new();
     public bool AutoUpdateTle { get; set; } = true;
+    public string Theme { get; set; } = "Light";
 }

@@ -26,6 +26,12 @@ public static class ConfigService
         {
             c.Latitude = lat; c.Longitude = lon;
         }
+        if (c.Favorites.Count == 0)
+        {
+            c.Favorites.Add(new FavoriteSatellite { Name = "ISS (ZARYA)", NoradId = 25544, Enabled = true });
+            c.Favorites.Add(new FavoriteSatellite { Name = "SO-50", NoradId = 27607, Enabled = true });
+            c.Favorites.Add(new FavoriteSatellite { Name = "AO-91", NoradId = 43137, Enabled = true });
+        }
         return c;
     }
 

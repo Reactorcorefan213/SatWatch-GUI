@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ThemeService.Apply(_cfg.Theme ?? "Light");
         if (MaidenheadConverter.TryParse(_cfg.Maidenhead, out var lat, out var lon))
         {
             _cfg.Latitude = lat; _cfg.Longitude = lon;
@@ -120,8 +121,21 @@ public partial class MainWindow : Window
         try
         {
             _cfg.LastTleUpdateUtc = DateTime.UtcNow;
-            var raw = await TleService.FetchRawAsync(_cfg.TleUpdateUrl);
-            var fetched = TleService.ParseTleText(raw);
+            var urls = new[]
+            {
+                "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle",
+                "https://celestrak.org/NORAD/elements/gp.php?GROUP=amateur&FORMAT=tle"
+            };
+            var fetched = new List<FavoriteSatellite>();
+            foreach (var u in urls)
+            {
+                try
+                {
+                    var raw = await TleService.FetchRawAsync(u);
+                    fetched.AddRange(TleService.ParseTleText(raw));
+                }
+                catch { }
+            }
             TleService.UpdateFavorites(_cfg, fetched);
             ConfigService.Save(_cfg);
             RebuildTracks();
@@ -164,6 +178,13 @@ public partial class MainWindow : Window
                 ScriptRunner.Run(rule.ScriptPath);
         if (rule.Action is AlarmActionType.Flash or AlarmActionType.All)
             Dispatcher.Invoke(() => new FlashOverlay(5).Show());
+    }
+
+    private void Theme_Click(object sender, RoutedEventArgs e)
+    {
+        _cfg.Theme = (_cfg.Theme == "Dark") ? "Light" : "Dark";
+        ThemeService.Apply(_cfg.Theme);
+        ConfigService.Save(_cfg);
     }
 
     private void Settings_Click(object sender, RoutedEventArgs e)
